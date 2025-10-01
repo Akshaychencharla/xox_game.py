@@ -1,5 +1,3 @@
-print("✅ This is the updated app.py file")
-
 import streamlit as st
 from game_logic import check_win_state, find_best_move, HUMAN, COMPUTER
 
@@ -13,35 +11,50 @@ if 'game_over' not in st.session_state:
     st.session_state.game_over = False
 
 def reset_game():
-    """Resets the board state and starts a new game."""
+    """
+    Resets the board state. 
+    The st.rerun() is REMOVED because this is a button callback.
+    """
     st.session_state.board = [""] * 9
     st.session_state.current_player = HUMAN
     st.session_state.game_over = False
-    st.rerun()
 
 # --- Game Logic Functions ---
 
 def handle_human_move(i):
-    """Handles human click and prepares for the AI move."""
+    """
+    Handles human click. 
+    The st.rerun() is REMOVED because this is a button callback.
+    """
     board = st.session_state.board
 
     if board[i] == "" and st.session_state.current_player == HUMAN and not st.session_state.game_over:
         board[i] = HUMAN
         winner = check_win_state(board)
+        
         if winner:
             st.session_state.game_over = True
         else:
+            # Switch to computer's turn, triggering AI logic later in the script
             st.session_state.current_player = COMPUTER
-        st.rerun()
+
 
 def ai_move():
     """Calculates and executes the AI's move."""
     board = st.session_state.board
 
+    # Check for game end before running Minimax (Prevents TypeErrors on full board)
+    if check_win_state(board) is not None:
+        st.session_state.game_over = True
+        return
+        
     if "" in board and not st.session_state.game_over:
         move_index = find_best_move(board)
+        
         if move_index != -1:
             board[move_index] = COMPUTER
+            
+            # Check for win immediately after AI move
             winner = check_win_state(board)
             if winner:
                 st.session_state.game_over = True
@@ -62,7 +75,7 @@ for i in range(3):
 
         # Emoji display for players
         if value == "":
-            label = " "  # Empty
+            label = " "
         elif value == HUMAN:
             label = "❌"
         else:
@@ -87,7 +100,8 @@ if st.session_state.current_player == COMPUTER and not st.session_state.game_ove
     st.info("AI is thinking...")
     with st.spinner("Calculating best move..."):
         ai_move()
-    st.rerun()
+    # CORRECT USAGE: st.rerun() is called *after* the function to force the UI update
+    st.rerun() 
 
 # --- Game Result ---
 
