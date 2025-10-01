@@ -88,7 +88,7 @@ for i in range(3):
                 on_click=handle_human_move,
                 args=(index,),
                 use_container_width=True,
-                unsafe_allow_html=True
+         
             )
 
 # --- AI Turn and Game End Handling ---
